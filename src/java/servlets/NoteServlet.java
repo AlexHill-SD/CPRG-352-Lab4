@@ -32,9 +32,11 @@ public class NoteServlet extends HttpServlet
         System.out.println("IN DO GET------------------------------------");
         
         Note newNote = readNoteFromFile();
+        
+        System.out.println(newNote);
 
         if (request.getParameterMap().containsKey("viewNote"))
-        {
+        {            
             request.setAttribute("note_title", newNote.getTitle());
             request.setAttribute("note_contents", newNote.getContents());
             
@@ -50,7 +52,7 @@ public class NoteServlet extends HttpServlet
             return;
         }
         else
-        {
+        {            
             request.setAttribute("note_title", newNote.getTitle());
             request.setAttribute("note_contents", newNote.getContents());
             
@@ -59,7 +61,6 @@ public class NoteServlet extends HttpServlet
         }
     }
 
-    
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
     {
@@ -73,7 +74,7 @@ public class NoteServlet extends HttpServlet
         saveNoteToFile(newNote);
         
         request.setAttribute("note_title", newNote.getTitle());
-        request.setAttribute("note_contents", newNote.getContents());
+        request.setAttribute("note_contents", newNote.getContents().replace("\n", "<br>"));
         
         getServletContext().getRequestDispatcher("/WEB-INF/viewNote.jsp").forward(request, response);
     }
@@ -109,9 +110,28 @@ public class NoteServlet extends HttpServlet
             BufferedReader fileReader = new BufferedReader(new FileReader(new File(notePath)));
             
             String noteTitle = fileReader.readLine();
-            String noteContents = fileReader.readLine();
+            String noteContents = "";
+            
+            String placeholder = fileReader.readLine();
+            do
+            {
+                if (noteContents.equals(""))
+                {
+                    noteContents += placeholder;
+                }
+                else
+                {
+                    noteContents += "\n";
+                    noteContents += placeholder;
+                }
+
+                placeholder = fileReader.readLine();
+            } while (placeholder != null);
             
             newNote = new Note(noteTitle, noteContents);
+            
+            System.out.println("IN READNOTE****************************");
+            System.out.println(newNote);
             
             fileReader.close();
         } catch (IOException IOE) 
